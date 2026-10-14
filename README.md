@@ -6,7 +6,7 @@ A small macOS menu bar app that plays each app's audio on a different output dev
 
 Requires macOS 14.2 or later (Apple Silicon or Intel).
 
-1. Open `SoundMixer-0.1.dmg` (in the dist dir).
+1. Download the latest **SoundMixer-x.x.dmg** from the [Releases page](https://github.com/NoAdsInside/Mac-Sound-Mixer/releases/latest), then open it.
 2. Drag **Sound Mixer** onto the **Applications** folder.
 3. Open Sound Mixer from Applications.
 4. If macOS says it can't verify the app, click **Done**. Then go to System Settings → Privacy & Security, scroll down, and click **Open Anyway** next to Sound Mixer. You only need to do this once. (Apologies but I can't be bothered to pay for teh privilage to sign an app for something that should be shipped with MacOS)
@@ -21,6 +21,12 @@ To make the installable DMG (universal, written to `dist/`):
 
 ```sh
 ./package.sh
+```
+
+To publish a new version, bump `CFBundleShortVersionString` in `Resources/Info.plist`, run `./package.sh`, then attach the DMG to a GitHub release:
+
+```sh
+gh release create v0.2 dist/SoundMixer-0.2.dmg --title "Sound Mixer 0.2"
 ```
 
 The DMG is ad-hoc signed by default, which is why users need the "Open Anyway" step. If you have an Apple Developer ID, `package.sh` can also sign and notarize the DMG so it opens with no warning. See the comment at the top of the script.
