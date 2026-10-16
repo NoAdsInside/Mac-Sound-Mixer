@@ -69,9 +69,12 @@ final class Route {
 
     /// Copies the stereo tap into the device's channels: L/R to the first two channels,
     /// silence on the rest, and an L/R average on a mono device. Assumes Float32 samples (HAL standard).
+    /// The aggregate's input also carries the device's own inputs (e.g. a headset mic) ahead of the tap,
+    /// so the tap is the last two input channels.
     private static func copy(from input: UnsafeMutableAudioBufferListPointer,
                              to output: UnsafeMutableAudioBufferListPointer) {
         let outChannels = output.reduce(0) { $0 + Int($1.mNumberChannels) }
+        let tap = max(0, input.reduce(0) { $0 + Int($1.mNumberChannels) } - 2)
         var channelBase = 0
         for buffer in output {
             let n = Int(buffer.mNumberChannels)
@@ -81,8 +84,8 @@ final class Route {
             for c in 0..<n {
                 for f in 0..<frames {
                     data[f * n + c] = outChannels == 1
-                        ? (sample(input, channel: 0, frame: f) + sample(input, channel: 1, frame: f)) * 0.5
-                        : sample(input, channel: channelBase + c, frame: f)
+                        ? (sample(input, channel: tap, frame: f) + sample(input, channel: tap + 1, frame: f)) * 0.5
+                        : channelBase + c < 2 ? sample(input, channel: tap + channelBase + c, frame: f) : 0
                 }
             }
         }
